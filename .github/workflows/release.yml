@@ -11,6 +11,7 @@ on:
 jobs:
   build-windows:
     runs-on: windows-latest
+
     steps:
       - name: Checkout Code
         uses: actions/checkout@v3
@@ -59,7 +60,7 @@ jobs:
       - name: Rename EXE (Windows)
         shell: cmd
         run: |
-          REM If the produced file isn’t exactly "PositionSizeCalculator.exe", rename the one found.
+          REM Look for any .exe file whose name contains "PositionSizeCalculator"
           for /f "delims=" %%i in ('dir /b /a-d *PositionSizeCalculator*.exe') do (
             echo Found installer: %%i
             ren "%%i" "PositionSizeCalculator.exe"
@@ -68,7 +69,7 @@ jobs:
           dir /b *.exe
 
       - name: Upload Windows Artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v3.1.2
         with:
           name: windows-exe
           path: PositionSizeCalculator.exe
@@ -107,7 +108,7 @@ jobs:
 
       - name: Package DMG with jpackage (macOS)
         run: |
-          REM For macOS, we assume you have an icon file "calculator.icns" in the repository root.
+          REM For macOS, ensure you have an icon file "calculator.icns" in the repository root.
           jpackage --input . --runtime-image runtime --dest . --name PositionSizeCalculator --main-jar PositionSizeCalculator.jar --main-class PositionSizeCalculator --icon calculator.icns --type dmg
           echo "Packaged files:"
           ls -l *.dmg
@@ -119,7 +120,7 @@ jobs:
           ls -l PositionSizeCalculator.dmg
 
       - name: Upload macOS Artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v3.1.2
         with:
           name: macos-dmg
           path: PositionSizeCalculator.dmg
@@ -140,13 +141,13 @@ jobs:
           prerelease: false
 
       - name: Download Windows Artifact
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v3.1.2
         with:
           name: windows-exe
           path: artifact_windows
 
       - name: Upload Windows Release Asset
-        uses: actions/upload-release-asset@v1
+        uses: actions/upload-release-asset@v3.1.2
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
@@ -156,13 +157,13 @@ jobs:
           asset_content_type: application/octet-stream
 
       - name: Download macOS Artifact
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v3.1.2
         with:
           name: macos-dmg
           path: artifact_macos
 
       - name: Upload macOS Release Asset
-        uses: actions/upload-release-asset@v1
+        uses: actions/upload-release-asset@v3.1.2
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
