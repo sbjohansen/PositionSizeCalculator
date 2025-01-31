@@ -42,7 +42,7 @@ jobs:
       - name: Package into JAR
         shell: cmd
         run: |
-          REM Replace 'PositionSizeCalculator' below with the fully qualified main class name if needed.
+          REM Replace 'PositionSizeCalculator' with the fully qualified main class name if needed.
           jar cfe PositionSizeCalculator.jar PositionSizeCalculator -C out .
           echo JAR contents:
           jar tf PositionSizeCalculator.jar
@@ -51,24 +51,12 @@ jobs:
       - name: Package native executable with jpackage
         shell: cmd
         run: |
-          REM This command creates a native installer.
-          jpackage --input out --dest . --name PositionSizeCalculator --main-jar PositionSizeCalculator.jar --main-class PositionSizeCalculator --icon calculator.ico --win-shortcut --win-menu --type exe
+          REM The --installer-name option forces the output installer to be named PositionSizeCalculator.exe.
+          jpackage --input out --dest . --name PositionSizeCalculator --installer-name PositionSizeCalculator.exe --main-jar PositionSizeCalculator.jar --main-class PositionSizeCalculator --icon calculator.ico --win-shortcut --win-menu --type exe
           echo Packaged files:
           dir
 
-      # 6. Rename the generated installer to PositionSizeCalculator.exe if necessary.
-      - name: Rename installer
-        shell: cmd
-        run: |
-          REM Loop through all .exe files in the current directory.
-          for /f "delims=" %%i in ('dir /b /a-d *.exe') do (
-            echo Found installer: %%i
-            if /I not "%%i"=="PositionSizeCalculator.exe" ren "%%i" "PositionSizeCalculator.exe"
-          )
-          echo After renaming:
-          dir
-
-      # 7. Create a GitHub Release using the pushed tag.
+      # 6. Create a GitHub Release using the pushed tag.
       - name: Create Release
         id: create_release
         uses: actions/create-release@v1
@@ -80,7 +68,7 @@ jobs:
           draft: false
           prerelease: false
 
-      # 8. Upload the native executable as a release asset.
+      # 7. Upload the native executable as a release asset.
       - name: Upload Release Asset
         uses: actions/upload-release-asset@v1
         env:
