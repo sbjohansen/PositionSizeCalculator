@@ -3,7 +3,7 @@ name: Build and Release (Windows EXE)
 permissions:
   contents: write
 
-# Trigger on push of a tag matching v*.*.*
+# Trigger this workflow when a tag matching v*.*.* is pushed.
 on:
   push:
     tags:
@@ -42,7 +42,7 @@ jobs:
       - name: Package into JAR
         shell: cmd
         run: |
-          REM Replace 'PositionSizeCalculator' with the fully qualified main class name if needed.
+          REM Replace 'PositionSizeCalculator' below with the fully qualified main class name if needed.
           jar cfe PositionSizeCalculator.jar PositionSizeCalculator -C out .
           echo JAR contents:
           jar tf PositionSizeCalculator.jar
@@ -51,7 +51,7 @@ jobs:
       - name: Package native executable with jpackage
         shell: cmd
         run: |
-          REM This command creates an installer. Adjust options as needed.
+          REM This command creates a native installer.
           jpackage --input out --dest . --name PositionSizeCalculator --main-jar PositionSizeCalculator.jar --main-class PositionSizeCalculator --icon calculator.ico --win-shortcut --win-menu --type exe
           echo Packaged files:
           dir
