@@ -3,7 +3,7 @@ name: Build and Release (Windows EXE)
 permissions:
   contents: write
 
-# Trigger this workflow on push of a tag matching the pattern v*.*.*
+# Trigger on push of a tag matching v*.*.*
 on:
   push:
     tags:
@@ -47,17 +47,28 @@ jobs:
           echo JAR contents:
           jar tf PositionSizeCalculator.jar
 
-      # 5. Use jpackage to create a native Windows executable with a custom calculator icon.
+      # 5. Use jpackage to create a native Windows executable with a custom icon.
       - name: Package native executable with jpackage
         shell: cmd
         run: |
-          REM --input points to the compiled classes directory (out), --dest specifies the destination,
-          REM --main-jar is the JAR file, and --main-class is your main class.
+          REM This command creates an installer. Adjust options as needed.
           jpackage --input out --dest . --name PositionSizeCalculator --main-jar PositionSizeCalculator.jar --main-class PositionSizeCalculator --icon calculator.ico --win-shortcut --win-menu --type exe
           echo Packaged files:
           dir
 
-      # 6. Create a GitHub Release using the pushed tag.
+      # 6. Rename the generated installer to PositionSizeCalculator.exe if necessary.
+      - name: Rename installer
+        shell: cmd
+        run: |
+          REM Loop through all .exe files in the current directory.
+          for /f "delims=" %%i in ('dir /b /a-d *.exe') do (
+            echo Found installer: %%i
+            if /I not "%%i"=="PositionSizeCalculator.exe" ren "%%i" "PositionSizeCalculator.exe"
+          )
+          echo After renaming:
+          dir
+
+      # 7. Create a GitHub Release using the pushed tag.
       - name: Create Release
         id: create_release
         uses: actions/create-release@v1
@@ -69,7 +80,7 @@ jobs:
           draft: false
           prerelease: false
 
-      # 7. Upload the native executable as a release asset.
+      # 8. Upload the native executable as a release asset.
       - name: Upload Release Asset
         uses: actions/upload-release-asset@v1
         env:
