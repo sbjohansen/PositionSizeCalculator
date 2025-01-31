@@ -403,10 +403,9 @@ public class PositionSizeCalculator extends JFrame {
                 double posSize = (accountBalance * riskPercent * effectiveEntry) / Math.abs(effectiveEntry - stopLoss);
                 sb.append("Trade Type: ").append(tradeType).append("\n");
                 sb.append("----------------------------------------\n");
-                sb.append(String.format("%-10s %12s\n", "Entry", "Position Size"));
-                sb.append(String.format("%-10s %12.2f\n", "Entry 1", posSize));
+                sb.append(String.format("%-10s %12.6f\n", "Entry", posSize));
                 sb.append("\n");
-                sb.append(String.format("Entry Price: %.2f\n", effectiveEntry));
+                sb.append(String.format("Entry Price: %.6f\n", effectiveEntry));
             } else if ("Equal-Sized DCA".equals(entryType)) {
                 double sum = 0.0;
                 for (double e : entries) {
@@ -420,12 +419,12 @@ public class PositionSizeCalculator extends JFrame {
                 double totalPosSize = (accountBalance * riskPercent * avgEntry) / Math.abs(avgEntry - stopLoss);
                 double posSizePerEntry = totalPosSize / count;
                 sb.append("Trade Type: ").append(tradeType).append("\n");
-                sb.append(String.format("Average Entry Price: $%.2f%n", avgEntry));
-                sb.append(String.format("Total Position Size: $%.2f%n", totalPosSize));
+                sb.append(String.format("Average Entry Price: $%.6f%n", avgEntry));
+                sb.append(String.format("Total Position Size: $%.6f%n", totalPosSize));
                 sb.append("----------------------------------------\n");
                 sb.append(String.format("%-10s %12s %12s%n", "Entry", "Price", "Allocation"));
                 for (int i = 0; i < count; i++) {
-                    sb.append(String.format("%-10s %12.2f %12.2f%n", "Entry " + (i + 1), entries[i], posSizePerEntry));
+                    sb.append(String.format("%-10s %12.6f %12.6f%n", "Entry " + (i + 1), entries[i], posSizePerEntry));
                 }
             } else if ("Exponential Entries".equals(entryType)) {
                 double[] ratios;
@@ -449,13 +448,13 @@ public class PositionSizeCalculator extends JFrame {
                 String tradeType = (weightedAvg > stopLoss) ? "Long" : "Short";
                 double totalPosSize = (accountBalance * riskPercent * weightedAvg) / Math.abs(weightedAvg - stopLoss);
                 sb.append("Trade Type: ").append(tradeType).append("\n");
-                sb.append(String.format("Weighted Average Entry: $%.2f%n", weightedAvg));
-                sb.append(String.format("Total Position Size: $%.2f%n", totalPosSize));
+                sb.append(String.format("Weighted Average Entry: $%.6f%n", weightedAvg));
+                sb.append(String.format("Total Position Size: $%.6f%n", totalPosSize));
                 sb.append("----------------------------------------\n");
                 sb.append(String.format("%-10s %12s %10s %12s%n", "Entry", "Price", "Ratio", "Allocation"));
                 for (int i = 0; i < count; i++) {
                     double entryAllocation = totalPosSize * (ratios[i] / sumRatios);
-                    sb.append(String.format("%-10s %12.2f %10.2f %12.2f%n", "Entry " + (i + 1), entries[i], ratios[i], entryAllocation));
+                    sb.append(String.format("%-10s %12.6f %10.2f %12.6f%n", "Entry " + (i + 1), entries[i], ratios[i], entryAllocation));
                 }
             }
             resultTextArea.setText(sb.toString());
