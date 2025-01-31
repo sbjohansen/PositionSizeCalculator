@@ -1,5 +1,9 @@
 name: Build and Release
 
+# Grant the GITHUB_TOKEN permission to write repository contents.
+permissions:
+  contents: write
+
 # This workflow runs when you push a tag matching the pattern v*.*.*
 on:
   push:
@@ -22,27 +26,23 @@ jobs:
           distribution: 'temurin'
           java-version: '11'
 
-      # 3. Create the output directory (if it does not already exist).
-      - name: Create output directory
-        run: mkdir -p out/production/position-size-caulculator
-
-      # 4. Compile Java source code from the 'src' directory.
+      # 3. Compile the Java source code from the 'src' directory.
       - name: Compile Java Source
         run: |
-          # Compile all .java files under src/ into the output directory
+          # Compile all .java files under src/ and output the classes into the designated IntelliJ output directory.
           javac -d out/production/position-size-caulculator $(find src -name "*.java")
           echo "Compilation output:"
           ls -R out/production/position-size-caulculator
 
-      # 5. Package the compiled classes into a runnable JAR.
+      # 4. Package the compiled classes into a runnable JAR.
       - name: Package into JAR
         run: |
-          # 'PositionSizeCalculator' is assumed to be your main class (adjust if necessary)
+          # Adjust the main class name as needed (include package name if applicable).
           jar cfe PositionSizeCalculator.jar PositionSizeCalculator -C out/production/position-size-caulculator .
           echo "JAR contents:"
           jar tf PositionSizeCalculator.jar
 
-      # 6. Create a GitHub Release using the pushed tag.
+      # 5. Create a GitHub Release using the pushed tag.
       - name: Create Release
         id: create_release
         uses: actions/create-release@v1
@@ -54,7 +54,7 @@ jobs:
           draft: false
           prerelease: false
 
-      # 7. Upload the JAR file as a release asset.
+      # 6. Upload the JAR file as a release asset.
       - name: Upload Release Asset
         uses: actions/upload-release-asset@v1
         env:
