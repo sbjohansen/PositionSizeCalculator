@@ -18,15 +18,16 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      # 2. Set up JDK 16 (or later) that includes jpackage.
+      # 2. Set up JDK 16 (or later) which includes jpackage.
       - name: Set up JDK 16
         uses: actions/setup-java@v3
         with:
           distribution: 'temurin'
           java-version: '16'
 
-      # 3. Compile the Java source code.
+      # 3. Compile the Java source code using cmd.
       - name: Compile Java Source
+        shell: cmd
         run: |
           REM Create the output directory.
           mkdir out
@@ -39,16 +40,19 @@ jobs:
 
       # 4. Package the compiled classes into a runnable JAR.
       - name: Package into JAR
+        shell: cmd
         run: |
           REM Replace 'PositionSizeCalculator' with the fully qualified main class name if needed.
           jar cfe PositionSizeCalculator.jar PositionSizeCalculator -C out .
           echo JAR contents:
           jar tf PositionSizeCalculator.jar
 
-      # 5. Use jpackage to create a native Windows executable with a calculator icon.
+      # 5. Use jpackage to create a native Windows executable with a custom calculator icon.
       - name: Package native executable with jpackage
+        shell: cmd
         run: |
-          REM The --dest option places the generated files in the current directory.
+          REM --input points to the compiled classes directory (out), --dest specifies the destination,
+          REM --main-jar is the JAR file, and --main-class is your main class.
           jpackage --input out --dest . --name PositionSizeCalculator --main-jar PositionSizeCalculator.jar --main-class PositionSizeCalculator --icon calculator.ico --win-shortcut --win-menu --type exe
           echo Packaged files:
           dir
