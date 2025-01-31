@@ -3,7 +3,6 @@ name: Build and Release (Windows Self‑Contained EXE)
 permissions:
   contents: write
 
-# Trigger this workflow when a tag matching v*.*.* is pushed.
 on:
   push:
     tags:
@@ -14,63 +13,48 @@ jobs:
     runs-on: windows-latest
 
     steps:
-      # 1. Check out the repository.
       - name: Checkout code
         uses: actions/checkout@v3
 
-      # 2. Set up JDK 16 (or later) which includes both jlink and jpackage.
       - name: Set up JDK 16
         uses: actions/setup-java@v3
         with:
           distribution: 'temurin'
           java-version: '16'
 
-      # 3. Compile the Java source code.
       - name: Compile Java Source
         shell: cmd
         run: |
-          REM Create the output directory.
           mkdir out
-          REM Generate a list of all .java files in the src folder.
           dir /b /s src\*.java > sources.txt
-          REM Compile the sources into the out directory.
           javac -d out @sources.txt
           echo Compiled classes:
           dir /s out
 
-      # 4. Package the compiled classes into a runnable JAR.
       - name: Package into JAR
         shell: cmd
         run: |
-          REM Replace 'PositionSizeCalculator' with your fully qualified main class name if needed.
           jar cfe PositionSizeCalculator.jar PositionSizeCalculator -C out .
           echo JAR contents:
           jar tf PositionSizeCalculator.jar
 
-      # 5. Create a self-contained runtime image using jlink.
       - name: Create Runtime Image
         shell: cmd
         run: |
-          REM Create a runtime image containing the java.desktop module (sufficient for Swing apps).
           jlink --module-path "%JAVA_HOME%\jmods" --add-modules java.desktop --output runtime
           echo Created runtime image:
           dir runtime
 
-      # 6. Use jpackage to create a native Windows executable with the bundled runtime.
       - name: Package native executable with jpackage
         shell: cmd
         run: |
-          REM The jar (PositionSizeCalculator.jar) is in the current directory.
-          REM This command creates a self-contained EXE that bundles the runtime from the 'runtime' folder.
           jpackage --runtime-image runtime --dest . --name PositionSizeCalculator --main-jar PositionSizeCalculator.jar --main-class PositionSizeCalculator --icon calculator.ico --win-shortcut --win-menu --type exe
           echo Packaged files:
           dir
 
-      # 7. Rename the generated installer (if necessary) to a known name.
       - name: Rename installer
         shell: cmd
         run: |
-          REM Look for any .exe file whose name contains "PositionSizeCalculator"
           for /f "delims=" %%i in ('dir /b /a-d *PositionSizeCalculator*.exe') do (
             echo Found installer: %%i
             ren "%%i" "PositionSizeCalculator.exe"
@@ -78,7 +62,6 @@ jobs:
           echo After renaming:
           dir
 
-      # 8. Create a GitHub Release using the pushed tag.
       - name: Create Release
         id: create_release
         uses: actions/create-release@v1
@@ -90,7 +73,6 @@ jobs:
           draft: false
           prerelease: false
 
-      # 9. Upload the generated EXE as a release asset.
       - name: Upload Release Asset (EXE)
         uses: actions/upload-release-asset@v1
         env:
