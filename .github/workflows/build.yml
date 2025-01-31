@@ -1,0 +1,63 @@
+
+*Make sure to update the URLs (e.g., `yourusername/PositionSizeCalculator`) with your actual GitHub username and repository name.*
+
+---
+
+## 4. Add a GitHub Actions Workflow
+
+Create a folder called `.github/workflows` (if it doesn’t already exist) in your repository. Then create a file named `release.yml` inside it with the following content:
+
+```yaml
+name: Build and Release
+
+# Trigger this workflow on push of a tag in the form vX.Y.Z (for example, v1.0.0)
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Step 1: Check out the repository
+      - uses: actions/checkout@v3
+
+      # Step 2: Set up Java (using JDK 11 in this example)
+      - name: Set up JDK 11
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: '11'
+
+      # Step 3: Compile the Java source code
+      - name: Compile Java source
+        run: javac PositionSizeCalculator.java
+
+      # Step 4: Package into a runnable JAR file
+      - name: Create JAR
+        run: jar cfe PositionSizeCalculator.jar PositionSizeCalculator *.class
+
+      # Step 5: Create a GitHub Release
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.ref }}
+          release_name: Release ${{ github.ref }}
+          draft: false
+          prerelease: false
+
+      # Step 6: Upload the JAR file as a release asset
+      - name: Upload Release Asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./PositionSizeCalculator.jar
+          asset_name: PositionSizeCalculator.jar
+          asset_content_type: application/java-archive
