@@ -10,7 +10,7 @@ Position Size Calculator is a user-friendly Java Swing application designed to h
 
 Download the latest release from the [Releases](https://github.com/sbjohansen/PositionSizeCalculator/releases) page. Once downloaded, you can install application and it will create shortcut on your desktop.
 
-Direct link [PositionSizeCalculator](https://github.com/sbjohansen/PositionSizeCalculator/releases/download/v1.0.15/PositionSizeCalculator.exe)
+Direct link [PositionSizeCalculator](https://github.com/sbjohansen/PositionSizeCalculator/releases/download/v1.0.21/PositionSizeCalculator.exe)
 
 ```bash
 java -jar PositionSizeCalculator.jar
