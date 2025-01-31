@@ -1,4 +1,4 @@
-name: Build and Release (Windows Native EXE)
+name: Build and Release (Native Executables)
 
 permissions:
   contents: write
@@ -11,24 +11,20 @@ on:
 jobs:
   build-windows:
     runs-on: windows-latest
-
     steps:
-      # 1. Check out the repository.
       - name: Checkout Code
         uses: actions/checkout@v3
 
-      # 2. Set up JDK 17 (which includes both jlink and jpackage).
-      - name: Set up JDK 17
+      - name: Set up JDK 17 (Windows)
         uses: actions/setup-java@v3
         with:
           distribution: temurin
           java-version: '17'
 
-      # 3. Compile the Java source code.
-      - name: Compile Source
+      - name: Compile Source (Windows)
         shell: cmd
         run: |
-          REM Create output directory.
+          REM Create the output directory.
           mkdir out
           REM List all .java files from src into sources.txt.
           dir /b /s src\*.java > sources.txt
@@ -37,8 +33,7 @@ jobs:
           echo Compiled classes:
           dir /s out
 
-      # 4. Package the compiled classes into a runnable JAR.
-      - name: Package into JAR
+      - name: Package JAR (Windows)
         shell: cmd
         run: |
           REM Create the jar with PositionSizeCalculator as the main class.
@@ -46,28 +41,25 @@ jobs:
           echo JAR contents:
           jar tf PositionSizeCalculator.jar
 
-      # 5. Create a minimal runtime image using jlink (includes the java.desktop module for Swing).
-      - name: Create Runtime Image with jlink
+      - name: Create Runtime Image with jlink (Windows)
         shell: cmd
         run: |
           jlink --module-path "%JAVA_HOME%\jmods" --add-modules java.desktop --output runtime
           echo Runtime image created:
           dir runtime
 
-      # 6. Use jpackage to create a native Windows executable.
-      - name: Package Native EXE with jpackage
+      - name: Package EXE with jpackage (Windows)
         shell: cmd
         run: |
-          REM We use --input . so that jpackage finds PositionSizeCalculator.jar in the current directory.
+          REM Use --input . so that jpackage finds PositionSizeCalculator.jar in the current directory.
           jpackage --input . --runtime-image runtime --dest . --name PositionSizeCalculator --main-jar PositionSizeCalculator.jar --main-class PositionSizeCalculator --icon calculator.ico --win-shortcut --win-menu --type exe
           echo Packaged files:
           dir /b *.exe
 
-      # 7. Rename the produced installer (if needed) to PositionSizeCalculator.exe.
-      - name: Rename Installer if Needed
+      - name: Rename EXE (Windows)
         shell: cmd
         run: |
-          REM Look for any .exe file whose name contains "PositionSizeCalculator"
+          REM If the produced file isn’t exactly "PositionSizeCalculator.exe", rename the one found.
           for /f "delims=" %%i in ('dir /b /a-d *PositionSizeCalculator*.exe') do (
             echo Found installer: %%i
             ren "%%i" "PositionSizeCalculator.exe"
@@ -75,7 +67,67 @@ jobs:
           echo After renaming:
           dir /b *.exe
 
-      # 8. Create a GitHub Release.
+      - name: Upload Windows Artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: windows-exe
+          path: PositionSizeCalculator.exe
+
+  build-macos:
+    runs-on: macos-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Set up JDK 17 (macOS)
+        uses: actions/setup-java@v3
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Compile Source (macOS)
+        run: |
+          mkdir -p out
+          find src -name "*.java" > sources.txt
+          javac -d out @sources.txt
+          echo "Compiled classes:"
+          find out
+
+      - name: Package JAR (macOS)
+        run: |
+          jar cfe PositionSizeCalculator.jar PositionSizeCalculator -C out .
+          echo "JAR contents:"
+          jar tf PositionSizeCalculator.jar
+
+      - name: Create Runtime Image with jlink (macOS)
+        run: |
+          jlink --module-path "$JAVA_HOME/jmods" --add-modules java.desktop --output runtime
+          echo "Runtime image created:"
+          ls -l runtime
+
+      - name: Package DMG with jpackage (macOS)
+        run: |
+          REM For macOS, we assume you have an icon file "calculator.icns" in the repository root.
+          jpackage --input . --runtime-image runtime --dest . --name PositionSizeCalculator --main-jar PositionSizeCalculator.jar --main-class PositionSizeCalculator --icon calculator.icns --type dmg
+          echo "Packaged files:"
+          ls -l *.dmg
+
+      - name: Rename DMG (macOS)
+        run: |
+          mv *PositionSizeCalculator*.dmg PositionSizeCalculator.dmg
+          echo "After renaming:"
+          ls -l PositionSizeCalculator.dmg
+
+      - name: Upload macOS Artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: macos-dmg
+          path: PositionSizeCalculator.dmg
+
+  release:
+    runs-on: ubuntu-latest
+    needs: [build-windows, build-macos]
+    steps:
       - name: Create Release
         id: create_release
         uses: actions/create-release@v1
@@ -87,13 +139,34 @@ jobs:
           draft: false
           prerelease: false
 
-      # 9. Upload the EXE as a release asset.
-      - name: Upload Release Asset
+      - name: Download Windows Artifact
+        uses: actions/download-artifact@v3
+        with:
+          name: windows-exe
+          path: artifact_windows
+
+      - name: Upload Windows Release Asset
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./PositionSizeCalculator.exe
+          asset_path: artifact_windows/PositionSizeCalculator.exe
           asset_name: PositionSizeCalculator.exe
+          asset_content_type: application/octet-stream
+
+      - name: Download macOS Artifact
+        uses: actions/download-artifact@v3
+        with:
+          name: macos-dmg
+          path: artifact_macos
+
+      - name: Upload macOS Release Asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: artifact_macos/PositionSizeCalculator.dmg
+          asset_name: PositionSizeCalculator.dmg
           asset_content_type: application/octet-stream
