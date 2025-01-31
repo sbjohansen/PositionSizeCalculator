@@ -1,13 +1,3 @@
-
-*Make sure to update the URLs (e.g., `yourusername/PositionSizeCalculator`) with your actual GitHub username and repository name.*
-
----
-
-## 4. Add a GitHub Actions Workflow
-
-Create a folder called `.github/workflows` (if it doesn’t already exist) in your repository. Then create a file named `release.yml` inside it with the following content:
-
-```yaml
 name: Build and Release
 
 # Trigger this workflow on push of a tag in the form vX.Y.Z (for example, v1.0.0)
