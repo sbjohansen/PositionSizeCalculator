@@ -59,7 +59,7 @@ jobs:
         shell: cmd
         run: |
           REM We use --input . so that jpackage finds PositionSizeCalculator.jar in the current directory.
-          jpackage --input . --runtime-image runtime --dest . --name PositionSizeCalculator --main-jar PositionSizeCalculator.jar --main-class PositionSizeCalculator --icon calculator.ico --win-shortcut --win-menu --type exe
+          jpackage --input . --runtime-image runtime --dest . --name PositionSizeCalculator --main-jar PositionSizeCalculator.jar --main-class PositionSizeCalculator --icon calculator.ico --win-shortcut --win-menu --win-upgrade-uuid 123e4567-e89b-12d3-a456-426614174000 --type exe
           echo Packaged files:
           dir /b *.exe
 
