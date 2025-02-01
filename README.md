@@ -53,9 +53,6 @@ Download the latest release from the [Releases](https://github.com/sbjohansen/Po
 
 Direct link: [PositionSizeCalculator.exe](https://github.com/sbjohansen/PositionSizeCalculator/releases/download/v1.0.27/PositionSizeCalculator.exe)
 
-```bash
-java -jar PositionSizeCalculator.jar
-```
 ### Building from Source
 If you prefer to build the application from source:
 
