@@ -57,9 +57,16 @@ jobs:
       # 6. Use jpackage to create a native Windows executable.
       - name: Package Native EXE with jpackage
         shell: cmd
+        env:
+          VERSION: ${{ github.ref }}
         run: |
-          REM We use --input . so that jpackage finds PositionSizeCalculator.jar in the current directory.
-          jpackage --input . --runtime-image runtime --dest . --name PositionSizeCalculator --main-jar PositionSizeCalculator.jar --main-class PositionSizeCalculator --icon calculator.ico --win-shortcut --win-menu --win-upgrade-uuid 123e4567-e89b-12d3-a456-426614174000 --type exe
+          REM Extract version from tag "refs/tags/v1.2.3":
+          REM "refs/tags/" is 10 characters; then remove the leading "v" (1 character) to get "1.2.3"
+          set VERSION=%VERSION:~10%
+          set VERSION=%VERSION:~1%
+          echo Version extracted: %VERSION%
+          REM Use the extracted version with --app-version
+          jpackage --input . --runtime-image runtime --dest . --name PositionSizeCalculator --app-version %VERSION% --main-jar PositionSizeCalculator.jar --main-class PositionSizeCalculator --icon calculator.ico --win-shortcut --win-menu --win-upgrade-uuid 123e4567-e89b-12d3-a456-426614174000 --type exe
           echo Packaged files:
           dir /b *.exe
 
