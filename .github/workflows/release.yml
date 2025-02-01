@@ -2,6 +2,7 @@ name: Build and Release (Windows Native EXE)
 
 permissions:
   contents: write
+  releases: write
 
 on:
   push:
