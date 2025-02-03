@@ -51,7 +51,7 @@
 
 Download the latest release from the [Releases](https://github.com/sbjohansen/PositionSizeCalculator/releases) page. Once downloaded, install the application—it will create a shortcut on your desktop.
 
-Direct link: [PositionSizeCalculator.exe](https://github.com/sbjohansen/PositionSizeCalculator/releases/download/v1.0.27/PositionSizeCalculator.exe)
+Direct link: [PositionSizeCalculator.exe](https://github.com/sbjohansen/PositionSizeCalculator/releases/download/v1.0.28/PositionSizeCalculator.exe)
 
 ### Building from Source
 If you prefer to build the application from source:
